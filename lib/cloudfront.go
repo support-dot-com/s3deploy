@@ -66,9 +66,8 @@ func (c *cloudFrontClient) InvalidateCDNCache(paths ...string) error {
 		bucket := strings.TrimPrefix(c.bucketPath, "/")
 		origin := strings.TrimPrefix(originPath, "/")
 		root = strings.TrimPrefix(bucket, origin)
-		subPath := strings.TrimPrefix(origin, bucket)
 		for i, p := range paths {
-			paths[i] = strings.TrimPrefix(p, subPath)
+			paths[i] = strings.TrimPrefix(p, origin)
 		}
 	}
 
