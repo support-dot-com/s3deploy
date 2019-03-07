@@ -26,6 +26,7 @@ type cloudFrontClient struct {
 
 	// Will invalidate the entire cache, e.g. "/*"
 	force      bool
+	bucketName string
 	bucketPath string
 
 	logger printer
@@ -42,6 +43,7 @@ func newCloudFrontClient(
 	return &cloudFrontClient{
 		distributionID: cfg.CDNDistributionID,
 		force:          cfg.Force,
+		bucketName:     cfg.BucketName,
 		bucketPath:     cfg.BucketPath,
 		logger:         logger,
 		cf:             cloudfront.New(sess),
@@ -60,8 +62,14 @@ func (c *cloudFrontClient) InvalidateCDNCache(paths ...string) error {
 		return err
 	}
 
-	originPath := *dcfg.Distribution.DistributionConfig.Origins.Items[0].OriginPath
 	var root string
+	var originPath string
+	for _, origin := range dcfg.Distribution.DistributionConfig.Origins.Items {
+		if c.bucketName == strings.TrimSuffix(*origin.DomainName, ".s3.amazonaws.com") {
+			originPath = *origin.OriginPath
+			break
+		}
+	}
 	if originPath != "" || c.bucketPath != "" {
 		bucket := strings.TrimPrefix(c.bucketPath, "/")
 		origin := strings.TrimPrefix(originPath, "/")
