@@ -28,3 +28,5 @@ cover.out
 nohup.out
 
 dist
+
+.vscode
